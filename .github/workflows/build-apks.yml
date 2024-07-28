@@ -71,14 +71,18 @@ jobs:
             echo 'android.native.buildOutput=verbose'
           } >> gradle.properties
           sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
-          ./gradlew clean assembleRelease
+          ./gradlew clean 
+          ./gradlew assembleRelease
+          ./gradlew assembleDebug
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         with:
           name: subcase
-          path: app/build/outputs/apk/release/*.apk
+          path: ｜
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/debug/*.apk
 
       - name: Upload mappings
         uses: actions/upload-artifact@v4
