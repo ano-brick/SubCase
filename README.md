@@ -8,8 +8,3 @@ A Powerful Wrapper for SubStore on Android.
 ## Library
 
 [goja](https://github.com/dop251/goja)
-
-## Loon Script
-
-[Loon Script Type](https://github.com/Loon0x00/LoonExampleConfig/blob/master/Script/script_README.md)
-[Loon Script API](https://nsloon.app/LoonManual/#/cn/script_api)
