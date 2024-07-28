@@ -46,42 +46,7 @@ fun SettingScreen(navController: NavController) {
 
             MoreSpan()
             Spacer(modifier = Modifier.height(10.dp))
-            InfoSpan()
-            Spacer(modifier = Modifier.height(10.dp))
             VersionSpan()
-        }
-    }
-}
-
-@Preview
-@Composable
-fun InfoSpan() {
-    val uriHandler = LocalUriHandler.current
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .clickable {
-                    uriHandler.openUri("https://anobrick.com/privacy")
-                }
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("隐私政策")
-
-            Icon(
-                Icons.Outlined.KeyboardArrowRight,
-                contentDescription = "隐私政策",
-                modifier = Modifier.size(28.dp)
-            )
         }
     }
 }
@@ -103,7 +68,7 @@ fun MoreSpan() {
                     .fillMaxWidth()
                     .height(50.dp)
                     .clickable {
-                        urlHandler.openUri("https://t.me/anobrick_channel")
+                        urlHandler.openUri("https://t.me/subcase_group")
                     }
                     .padding(horizontal = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
