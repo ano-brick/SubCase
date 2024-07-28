@@ -1,0 +1,22 @@
+name: Release
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build-apks:
+    uses: ./.github/workflows/build-apks.yml
+    secrets: inherit
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+            files: |
+              subcase/*.apk
+              mappings/*.txt
