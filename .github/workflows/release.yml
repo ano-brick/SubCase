@@ -22,5 +22,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
             files: |
-              subcase/*.apk
+              subcase/debug/*.apk
+              subcase/release/*.apk
               mappings/mapping.txt
