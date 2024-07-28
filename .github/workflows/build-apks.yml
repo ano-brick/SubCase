@@ -1,4 +1,4 @@
-name: BUILD-CI
+name: BUILD-APKS
 on:
   push:
     branches:
@@ -6,12 +6,10 @@ on:
     paths-ignore:
       - '**.md'
       - '.gitignore'
-      - 'docs/**'
   pull_request:
     paths-ignore:
       - '**.md'
       - '.gitignore'
-      - 'docs/**'
   workflow_dispatch:
 
 jobs:
@@ -67,6 +65,7 @@ jobs:
           ./gradlew assembleRelease
 
       - name: Post to Telegram
+        if: false
         env:
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}

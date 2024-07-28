@@ -1,5 +1,19 @@
 import java.io.ByteArrayOutputStream
 
+
+plugins {
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("org.lsposed.lsplugin.apksign") version "1.4"
+}
+
+apksign {
+    storeFileProperty = "KEYSTORE_FILE"
+    storePasswordProperty = "KEYSTORE_PASSWORD"
+    keyAliasProperty = "KEY_ALIAS"
+    keyPasswordProperty = "KEY_PASSWORD"
+}
+
 val verCode: Int? by rootProject
 val verName: String? by rootProject
 
@@ -8,19 +22,14 @@ val androidStorePassword: String? by rootProject
 val androidKeyAlias: String? by rootProject
 val androidKeyPassword: String? by rootProject
 
-plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.jetbrainsKotlinAndroid)
-}
-
 android {
     namespace = "ano.subcase"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "ano.subcase"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = verCode
         versionName = verName
 
@@ -46,25 +55,9 @@ android {
         }
     }
 
-    signingConfigs {
-        create("config") {
-            androidStoreFile?.also {
-                storeFile = rootProject.file(it)
-                storePassword = androidStorePassword
-                keyAlias = androidKeyAlias
-                keyPassword = androidKeyPassword
-            }
-        }
-    }
-
     buildTypes {
-        signingConfigs.named("config").get().also {
-
-            debug {
-                signingConfig = it
-            }
+            debug {}
             release {
-                signingConfig = it
                 isMinifyEnabled = true
                 isShrinkResources = true
 
@@ -74,7 +67,6 @@ android {
                 )
             }
             setProperty("archivesBaseName", "SubCase-$verName-$verCode")
-        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
