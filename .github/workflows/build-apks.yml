@@ -41,13 +41,15 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-home-cache-cleanup: true
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: 'stable'
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
 
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
@@ -64,7 +66,7 @@ jobs:
           {
             echo 'org.gradle.parallel=true'
             echo 'org.gradle.vfs.watch=true'
-            echo 'org.gradle.jvmargs=-Xmx2048m'
+            echo 'org.gradle.jvmargs=-Xmx4g'
             echo 'android.native.buildOutput=verbose'
           } >> gradle.properties
           sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
