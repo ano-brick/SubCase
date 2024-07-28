@@ -79,6 +79,14 @@ jobs:
           name: subcase
           path: app/build/outputs/apk/release/*.apk
 
+      - name: Upload mappings
+        uses: actions/upload-artifact@v4
+        if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
+        with:
+          name: mappings
+          path: app/build/outputs/mapping/release/
+
+
       - name: Post to Telegram
         if: false
         env:
