@@ -11,6 +11,8 @@ jobs:
     secrets: inherit
   release:
     runs-on: ubuntu-latest
+    needs:
+      - build-apks
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
