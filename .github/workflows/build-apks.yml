@@ -80,7 +80,7 @@ jobs:
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         with:
           name: subcase
-          path: ｜
+          path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/apk/debug/*.apk
 
