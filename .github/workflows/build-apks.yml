@@ -59,10 +59,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build debug and release apk
+      - name: Build with Gradle
         run: |
-          ./gradlew assembleDebug
-          ./gradlew assembleRelease
+          {
+            echo 'org.gradle.parallel=true'
+            echo 'org.gradle.vfs.watch=true'
+            echo 'org.gradle.jvmargs=-Xmx2048m'
+            echo 'android.native.buildOutput=verbose'
+          } >> gradle.properties
+          sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
+          ./gradlew clean assembleRelease
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
+        with:
+          name: subcase
+          path: app/build/outputs/apk/release/*.apk
 
       - name: Post to Telegram
         if: false
