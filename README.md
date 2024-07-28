@@ -2,7 +2,7 @@
 
 A Powerful Wrapper for [SubStore](https://github.com/sub-store-org/Sub-Store) on Android.
 
-[![Latest release](https://img.shields.io/github/v/release/anobrick/SubCase?label=Release&logo=github)](https://github.com/anobrick/SubCase/releases/latest)
+[![Latest release](https://img.shields.io/github/v/release/ano-brick/SubCase?label=Release&logo=github)](https://github.com/ano-brick/SubCase/releases/latest)
 [![Channel](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/subcase_group)
 
 
