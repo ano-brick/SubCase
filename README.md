@@ -6,10 +6,12 @@ A Powerful Wrapper for [SubStore](https://github.com/sub-store-org/Sub-Store) on
 [![Channel](https://img.shields.io/badge/Follow-Telegram-blue.svg?logo=telegram)](https://t.me/subcase_group)
 
 
-## Features
-1、no need root permission, no need nodejs runtime.
-2、easy to use
+<img src="https://github.com/user-attachments/assets/369af4cd-9699-4c40-ba46-7e37085ee891" width="250">
 
-## Library
+## Features
+1. no need root permission, no need nodejs runtime.  
+2. easy to use.  
+
+## Used Library
 
 [goja](https://github.com/dop251/goja)
