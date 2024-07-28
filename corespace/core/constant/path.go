@@ -24,5 +24,5 @@ func (p *path) BackendDir() string {
 }
 
 func (p *path) FrontendDir() string {
-	return P.Join(p.homeDir, "frontend/dist")
+	return P.Join(p.homeDir, "frontend")
 }
