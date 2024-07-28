@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="service_status">服务状态</string>
+    <string name="frontend">前端</string>
+    <string name="backend">后端</string>
+    <string name="address">地址</string>
+    <string name="allow_lan">允许局域网访问</string>
+    <string name="info_screen">关于应用</string>
+
+    <string name="version">版本</string>
+
+    <string name="navigate_back">返回上一页</string>
+
+    <string name="notification_content">正在后台运行</string>
+</resources>

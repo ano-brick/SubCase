@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name" translatable="false">SubCase</string>
+
+    <string name="service_status">Service Status</string>
+    <string name="frontend">Frontend</string>
+    <string name="backend">Backend</string>
+    <string name="address">Address</string>
+    <string name="allow_lan">Allow Lan</string>
+    <string name="version">Version</string>
+
+    <string name="info_screen">About Subcase</string>
+
+    <string name="navigate_back">Return to the previous page</string>
+
+    <string name="notification_content">Is running in the background</string>
+</resources>
