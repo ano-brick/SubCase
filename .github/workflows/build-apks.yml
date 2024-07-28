@@ -85,21 +85,3 @@ jobs:
         with:
           name: mappings
           path: app/build/outputs/mapping/release/
-
-
-      - name: Post to Telegram
-        if: false
-        env:
-          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-          TG_API_ID: ${{ secrets.TG_API_ID }}
-          TG_API_HASH: ${{ secrets.TG_API_HASH }}
-          COMMIT_URL: ${{ github.event.head_commit.url }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-        run: |
-          apkDebug=$(find ./app/build/outputs/apk/debug -name "*.apk")
-          apkRelease=$(find ./app/build/outputs/apk/release -name "*.apk")
-          aabRelease=$(find ./app/build/outputs/bundle/release -name "*.aab")
-          pip3 install telethon==1.34.0
-          python3 $GITHUB_WORKSPACE/scripts/cibot.py $apkDebug $apkRelease $aabRelease

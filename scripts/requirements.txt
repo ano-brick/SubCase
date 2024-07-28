@@ -1,2 +1,0 @@
-telethon==1.35.0
-google-api-python-client==2.130.0
