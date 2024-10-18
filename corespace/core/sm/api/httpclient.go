@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type RequestParams struct {
@@ -106,7 +105,7 @@ func doRequest(method string, call goja.FunctionCall) goja.Value {
 
 	// 发送HTTP请求
 	client := &http.Client{
-		Timeout: time.Duration(requestObj.Timeout) * time.Millisecond,
+		Timeout: 10000, //time.Duration(requestObj.Timeout) * time.Millisecond,
 		Transport: &http.Transport{
 			// force use http/1.1
 			TLSNextProto: make(map[string]func(authority string, c *tls.Conn) http.RoundTripper),

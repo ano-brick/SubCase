@@ -23,6 +23,7 @@ func Process(request model.Request) (response model.Response, err error) {
 
 	flag := matchRoute(request.Url)
 	log.Debugln("process url: %s, flag: %d", request.Url, flag)
+	log.Debugln("process request: %v", request)
 
 	content, err := os.ReadFile(path.Join(C.Path.BackendDir(), "sub-store-"+strconv.Itoa(flag)+".min.js"))
 	if err != nil {
@@ -37,6 +38,8 @@ func Process(request model.Request) (response model.Response, err error) {
 	}
 
 	vm.Set("$request", request)
+
+	log.Debugln("start to run scripts")
 
 	_, err = vm.RunString(string(content))
 	if err != nil {

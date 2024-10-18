@@ -35,12 +35,11 @@ func (h *BackendHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	body := ""
 
-	if r.Method == "POST" {
+	if r.Method == "POST" || r.Method == "PATCH" || r.Method == "PUT" {
 		bodyBytes, _ := io.ReadAll(r.Body)
 		body = string(bodyBytes)
 	}
 
-	//TODO url can't get params  https://sub.store/download/test1,
 	req := model.Request{
 		Url:     url,
 		Method:  r.Method,
