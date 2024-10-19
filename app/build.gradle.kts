@@ -1,9 +1,7 @@
-import java.io.ByteArrayOutputStream
-
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.compose.compiler)
     id("org.lsposed.lsplugin.apksign") version "1.4"
 }
 
@@ -82,9 +80,6 @@ android {
         compose = true
         buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -111,8 +106,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.timber)
-
-    implementation(libs.okhttp)
 
     //com.google.accompanist:accompanist-systemuicontroller
     implementation(libs.accompanist.systemuicontroller)

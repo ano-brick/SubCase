@@ -9,6 +9,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.calllogging.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -62,18 +63,14 @@ class BackendServer(
                         }
                         call.response.status(HttpStatusCode.fromValue(resp.statusCode))
 
-                        // CORS
-                        call.response.headers.append("Access-Control-Allow-Origin", "*")
-                        call.response.headers.append("Access-Control-Allow-Headers", "*")
-                        call.response.headers.append(
-                            "Access-Control-Allow-Methods",
-                            "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-                        )
-
                         call.respondText(resp.body)
                     }
                 }
             }
+        }
+
+        install(CORS) {
+            anyHost()
         }
 
         install(CallLogging) {
