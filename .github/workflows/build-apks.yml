@@ -47,11 +47,6 @@ jobs:
         with:
           gradle-home-cache-cleanup: true
 
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 'stable'
-
       - name: Cache Gradle dependencies
         uses: actions/cache@v3
         with:

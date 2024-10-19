@@ -14,5 +14,5 @@ A Powerful Wrapper for [SubStore](https://github.com/sub-store-org/Sub-Store) on
 
 ## Used Library
 
-[J2V8](https://github.com/eclipsesource/J2V8)
-[Ktor](https://ktor.io/)
+1. [J2V8](https://github.com/eclipsesource/J2V8)  
+2. [Ktor](https://ktor.io/)
