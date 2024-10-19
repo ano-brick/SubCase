@@ -21,8 +21,15 @@ class FrontendServer() {
 
     private val server = embeddedServer(Netty, port = 8081) {
         routing {
-            staticFiles("/", File("${caseApp.filesDir.path}/frontend"))
+            staticFiles(
+                "/",
+                File("${caseApp.filesDir.path}/frontend"),
+                index = "index.html",
+            ) {
+                default("index.html")
+            }
         }
+
         install(CallLogging) {
             level = Level.INFO
             logger = StaticLoggerBinder.getSingleton().loggerFactory.getLogger(

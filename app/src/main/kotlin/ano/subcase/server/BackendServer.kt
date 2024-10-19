@@ -60,19 +60,7 @@ class BackendServer(
                         resp.headers.forEach { (key, value) ->
                             call.response.headers.append(key, value)
                         }
-                        call.response.status(
-                            when (resp.statusCode) {
-                                200 -> HttpStatusCode.OK
-                                201 -> HttpStatusCode.Created
-                                204 -> HttpStatusCode.NoContent
-                                400 -> HttpStatusCode.BadRequest
-                                401 -> HttpStatusCode.Unauthorized
-                                403 -> HttpStatusCode.Forbidden
-                                404 -> HttpStatusCode.NotFound
-                                500 -> HttpStatusCode.InternalServerError
-                                else -> HttpStatusCode.OK
-                            }
-                        )
+                        call.response.status(HttpStatusCode.fromValue(resp.statusCode))
 
                         // CORS
                         call.response.headers.append("Access-Control-Allow-Origin", "*")
