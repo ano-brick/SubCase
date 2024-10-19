@@ -7,28 +7,33 @@ import ano.subcase.CaseStatus
 import ano.subcase.server.BackendServer
 import ano.subcase.server.FrontendServer
 import ano.subcase.util.NotificationUtil
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class SubStoreService : Service() {
+    lateinit var backendServer: BackendServer
+    lateinit var frontendServer: FrontendServer
+
     override fun onBind(intent: Intent): IBinder? {
         return null
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
-        val frontendPort = intent.getIntExtra("frontendPort", 8080)
-        val backendPort = intent.getIntExtra("backendPort", 8081)
+        val frontendPort = intent.getIntExtra("frontendPort", 8081)
+        val backendPort = intent.getIntExtra("backendPort", 8080)
 
         val allowLan = intent.getBooleanExtra("allowLan", false)
 
-        BackendServer(
-            allowLan = true
-        ).start()
+        backendServer = BackendServer(
+            port = backendPort,
+            allowLan = allowLan
+        )
+        backendServer.start()
 
-        FrontendServer().start()
+        frontendServer = FrontendServer(
+            port = frontendPort,
+            allowLan = allowLan
+        )
+        frontendServer.start()
 
         NotificationUtil.startNotification(this)
 
@@ -37,17 +42,13 @@ class SubStoreService : Service() {
         return START_STICKY
     }
 
-    override fun onLowMemory() {
-        super.onLowMemory()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
 
         CaseStatus.isServiceRunning.value = false
 
-//        NativeBridge.nativeStopBackend()
-//        NativeBridge.nativeStopFrontend()
+        backendServer.stop()
+        frontendServer.stop()
 
         NotificationUtil.stopNotification()
     }

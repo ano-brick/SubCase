@@ -5,13 +5,13 @@ import ano.subcase.caseApp
 import ano.subcase.engine.ScriptEngine
 import ano.subcase.model.Request
 import io.ktor.http.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
-import io.ktor.server.application.*
 import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.util.date.*
 import org.slf4j.event.Level
 import org.slf4j.impl.StaticLoggerBinder
@@ -92,5 +92,10 @@ class BackendServer(
     fun start() {
         Timber.d("Starting backend server")
         server.start(wait = false)
+    }
+
+    fun stop() {
+        Timber.d("Stopping backend server")
+        server.stop(1000, 1000)
     }
 }

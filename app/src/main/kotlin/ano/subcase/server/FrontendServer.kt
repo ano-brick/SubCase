@@ -1,6 +1,5 @@
 package ano.subcase.server
 
-import android.util.Log
 import ano.subcase.R
 import ano.subcase.caseApp
 import io.ktor.server.application.*
@@ -16,10 +15,17 @@ import org.slf4j.impl.StaticLoggerBinder
 import timber.log.Timber
 import java.io.File
 
-class FrontendServer() {
+class FrontendServer(
+    port: Int = 8081,
+    allowLan: Boolean = false
+) {
     private var clock: () -> Long = { getTimeMillis() }
 
-    private val server = embeddedServer(Netty, port = 8081) {
+    private val server = embeddedServer(
+        factory = Netty,
+        port = port,
+        host = if (allowLan) "0.0.0.0" else "127.0.0.1"
+    ) {
         routing {
             staticFiles(
                 "/",
@@ -46,5 +52,10 @@ class FrontendServer() {
     fun start() {
         Timber.d("Starting frontend server")
         server.start(wait = false)
+    }
+
+    fun stop() {
+        Timber.d("Stopping frontend server")
+        server.stop(1000, 1000)
     }
 }
