@@ -45,12 +45,6 @@ android {
                 )
             )
         }
-
-        externalNativeBuild {
-            cmake {
-                cppFlags += "-std=c++17"
-            }
-        }
     }
 
     buildTypes {
@@ -73,7 +67,7 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-    packagingOptions {
+    packaging {
         resources.excludes.addAll(listOf("META-INF/*"))
     }
     buildFeatures {
@@ -120,8 +114,6 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:$ktor_version")
 
     implementation("org.slf4j:slf4j-android:1.7.36")
-
-
 
     implementation("com.eclipsesource.j2v8:j2v8:6.2.1@aar")
 }
