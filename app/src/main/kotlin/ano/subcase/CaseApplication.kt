@@ -1,6 +1,7 @@
 package ano.subcase
 
 import android.app.Application
+import ano.subcase.server.FrontendServer
 import ano.subcase.util.AppUtil
 import ano.subcase.util.ConfigStore
 import timber.log.Timber
@@ -16,10 +17,10 @@ class CaseApplication : Application() {
         Timber.d("TimberInitializer is initialized.")
         caseApp = this
 
+
         if (ConfigStore.isFirstOpen) {
             AppUtil.initFirstOpen()
             ConfigStore.isFirstOpen = false
         }
     }
-
 }

@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import ano.subcase.CaseStatus
 import ano.subcase.R
+import ano.subcase.server.BackendServer
+import ano.subcase.server.FrontendServer
 import ano.subcase.ui.theme.switchColors
 import ano.subcase.util.ConfigStore
 import ano.subcase.util.SubStore
@@ -84,7 +87,7 @@ fun MainScreen(navController: NavController) {
 @Composable
 fun ServerSwitch(mViewModel: MainViewModel) {
     val haptic = LocalHapticFeedback.current
-
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -112,6 +115,7 @@ fun ServerSwitch(mViewModel: MainViewModel) {
                     )
 
                     ConfigStore.isServiceRunning = it
+
 
                     if (it) {
                         mViewModel.startService()

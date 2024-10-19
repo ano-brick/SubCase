@@ -4,7 +4,8 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import ano.subcase.CaseStatus
-import ano.subcase.NativeBridge
+import ano.subcase.server.BackendServer
+import ano.subcase.server.FrontendServer
 import ano.subcase.util.NotificationUtil
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -23,13 +24,11 @@ class SubStoreService : Service() {
 
         val allowLan = intent.getBooleanExtra("allowLan", false)
 
-        GlobalScope.launch {
-            NativeBridge.nativeStartFrontend(frontendPort, allowLan)
-        }
+        BackendServer(
+            allowLan = true
+        ).start()
 
-        GlobalScope.launch {
-            NativeBridge.nativeStartBackend(backendPort, allowLan)
-        }
+        FrontendServer().start()
 
         NotificationUtil.startNotification(this)
 
@@ -40,7 +39,6 @@ class SubStoreService : Service() {
 
     override fun onLowMemory() {
         super.onLowMemory()
-        NativeBridge.nativeForceGc()
     }
 
     override fun onDestroy() {
@@ -48,8 +46,8 @@ class SubStoreService : Service() {
 
         CaseStatus.isServiceRunning.value = false
 
-        NativeBridge.nativeStopBackend()
-        NativeBridge.nativeStopFrontend()
+//        NativeBridge.nativeStopBackend()
+//        NativeBridge.nativeStopFrontend()
 
         NotificationUtil.stopNotification()
     }
