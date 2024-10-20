@@ -9,8 +9,11 @@ import ano.subcase.server.FrontendServer
 import ano.subcase.util.NotificationUtil
 
 class SubStoreService : Service() {
-    lateinit var backendServer: BackendServer
-    lateinit var frontendServer: FrontendServer
+
+    companion object {
+        var backendServer: BackendServer? = null
+        var frontendServer: FrontendServer? = null
+    }
 
     override fun onBind(intent: Intent): IBinder? {
         return null
@@ -27,13 +30,13 @@ class SubStoreService : Service() {
             port = backendPort,
             allowLan = allowLan
         )
-        backendServer.start()
+        backendServer!!.start()
 
         frontendServer = FrontendServer(
             port = frontendPort,
             allowLan = allowLan
         )
-        frontendServer.start()
+        frontendServer!!.start()
 
         NotificationUtil.startNotification(this)
 
@@ -47,8 +50,8 @@ class SubStoreService : Service() {
 
         CaseStatus.isServiceRunning.value = false
 
-        backendServer.stop()
-        frontendServer.stop()
+        backendServer!!.stop()
+        frontendServer!!.stop()
 
         NotificationUtil.stopNotification()
     }

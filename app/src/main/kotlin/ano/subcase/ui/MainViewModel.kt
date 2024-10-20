@@ -6,8 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import ano.subcase.service.SubStoreService
+import androidx.lifecycle.viewModelScope
 import ano.subcase.caseApp
+import ano.subcase.service.SubStoreService
 import ano.subcase.util.AppUtil.unzip
 import ano.subcase.util.ConfigStore
 import ano.subcase.util.GithubUtil
@@ -38,12 +39,15 @@ class MainViewModel : ViewModel() {
         intent.putExtra("backendPort", 8080)
         intent.putExtra("frontendPort", 8081)
         intent.putExtra("allowLan", allowLan)
-
-        caseApp.startService(intent)
+        viewModelScope.launch {
+            caseApp.startService(intent)
+        }
     }
 
     fun stopService() {
-        caseApp.stopService(Intent(caseApp, SubStoreService::class.java))
+        viewModelScope.launch {
+            caseApp.stopService(Intent(caseApp, SubStoreService::class.java))
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)

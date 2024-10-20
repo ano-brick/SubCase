@@ -56,6 +56,6 @@ class FrontendServer(
 
     fun stop() {
         Timber.d("Stopping frontend server")
-        server.stop(1000, 1000)
+        server.stop(0, 0)
     }
 }
