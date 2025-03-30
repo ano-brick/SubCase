@@ -53,22 +53,5 @@ class MainActivity : ComponentActivity() {
 fun SetupNavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "main_screen") {
         composable("main_screen") { MainScreen(navController = navController) }
-        composable(
-            "settings_screen",
-            enterTransition = {
-                slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Left,
-                    animationSpec = tween(300)
-                )
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(300)
-                )
-            }
-        ) {
-            SettingScreen(navController = navController)
-        }
     }
 }

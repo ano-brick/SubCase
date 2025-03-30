@@ -40,14 +40,18 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import ano.subcase.BuildConfig
 import ano.subcase.CaseStatus
 import ano.subcase.R
 import ano.subcase.server.BackendServer
 import ano.subcase.server.FrontendServer
+import ano.subcase.ui.theme.Blue
 import ano.subcase.ui.theme.switchColors
 import ano.subcase.util.ConfigStore
 import ano.subcase.util.SubStore
@@ -80,6 +84,8 @@ fun MainScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.padding(10.dp))
             OpenSubStore(mViewModel)
+
+            VersionSpan()
         }
     }
 }
@@ -137,7 +143,9 @@ fun FrontEndCard(mViewModel: MainViewModel) {
     val urlHandler = LocalUriHandler.current
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp),
         horizontalArrangement = Arrangement.Start,
     ) {
         Text(
@@ -203,6 +211,7 @@ fun FrontEndCard(mViewModel: MainViewModel) {
                     modifier = Modifier.clickable {
                         urlHandler.openUri("https://github.com/sub-store-org/Sub-Store-Front-End/releases")
                     },
+                    color = Blue
                 )
             }
 
@@ -216,7 +225,9 @@ fun BackEndCard(mViewModel: MainViewModel) {
     val urlHandler = LocalUriHandler.current
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp),
         horizontalArrangement = Arrangement.Start,
     ) {
         Text(
@@ -284,6 +295,7 @@ fun BackEndCard(mViewModel: MainViewModel) {
                     modifier = Modifier.clickable {
                         urlHandler.openUri("https://github.com/sub-store-org/Sub-Store/releases")
                     },
+                    color = Blue
                 )
             }
         }
@@ -384,7 +396,7 @@ fun OpenSubStore(mViewModel: MainViewModel) {
         },
         colors = ButtonDefaults.textButtonColors(
             contentColor = Color.White,
-            containerColor = Color(0xFF478ef2)
+            containerColor = Blue
         )
     )
 }
@@ -417,18 +429,22 @@ fun MainTopBar(navController: NavController, mViewModel: MainViewModel) {
                     modifier = Modifier.size(24.dp)
                 )
             }
-
-            IconButton(
-                onClick = {
-                    navController.navigate("settings_screen")
-                },
-            ) {
-                Icon(
-                    Icons.Outlined.Info,
-                    contentDescription = stringResource(R.string.info_screen),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
         },
     )
+}
+
+@Preview
+@Composable
+fun VersionSpan() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            stringResource(id = R.string.app_name) + " " + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")",
+            color = Color.Gray,
+            fontWeight = FontWeight.Light,
+            fontSize = 14.sp,
+        )
+    }
 }
