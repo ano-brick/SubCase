@@ -392,7 +392,7 @@ fun OpenSubStore(mViewModel: MainViewModel) {
             Text("打开SubStore")
         },
         onClick = {
-            urlHandler.openUri("http://${host}:8081")
+            urlHandler.openUri("http://${host}:8081/subs?api=http://${host}:8080")
         },
         colors = ButtonDefaults.textButtonColors(
             contentColor = Color.White,
