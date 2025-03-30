@@ -6,7 +6,6 @@ import ano.subcase.util.PreferencesKeys.ALLOW_LAN
 import ano.subcase.caseApp
 import ano.subcase.util.PreferencesKeys.APP_IS_FIRST_OPEN
 import ano.subcase.util.PreferencesKeys.BACKEND_LOCAL_VER
-import ano.subcase.util.PreferencesKeys.CRASH_REPORT
 import ano.subcase.util.PreferencesKeys.FRONTEND_LOCAL_VER
 import ano.subcase.util.PreferencesKeys.SERVICE_RUNNING
 
@@ -49,13 +48,13 @@ object ConfigStore {
             getInstance().edit().putBoolean(ALLOW_LAN, value).apply()
         }
 
-    var frontendLocalVer: String
+    var localFrontendVersion: String
         get() = getInstance().getString(FRONTEND_LOCAL_VER, "")!!
         set(value) {
             getInstance().edit().putString(FRONTEND_LOCAL_VER, value).apply()
         }
 
-    var backendLocalVer: String
+    var localBackendVersion: String
         get() = getInstance().getString(BACKEND_LOCAL_VER, "")!!
         set(value) {
             getInstance().edit().putString(BACKEND_LOCAL_VER, value).apply()

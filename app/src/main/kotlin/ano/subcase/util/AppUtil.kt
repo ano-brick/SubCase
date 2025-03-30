@@ -15,7 +15,7 @@ object AppUtil {
     }
 
     private fun extractBackendFile() {
-        SubStore.backendLocalVer = "2.14.301"
+        SubStore.localBackendVersion = "2.14.301"
 
         val assetManager = caseApp.assets
 
@@ -42,7 +42,7 @@ object AppUtil {
     }
 
     private fun extractFrontendDist() {
-        SubStore.frontendLocalVer = "2.14.230"
+        SubStore.localFrontendVersion = "2.14.230"
 
         val assetManager = caseApp.assets
 

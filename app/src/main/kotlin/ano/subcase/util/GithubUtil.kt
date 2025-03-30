@@ -7,14 +7,13 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.io.path.Path
 
-val REPO_BACKEND = "https://github.com/sub-store-org/Sub-Store"
-val REPO_FRONTEND = "https://github.com/sub-store-org/Sub-Store-Front-End"
-
+const val REPO_BACKEND = "https://github.com/sub-store-org/Sub-Store"
+const val REPO_FRONTEND = "https://github.com/sub-store-org/Sub-Store-Front-End"
 
 object GithubUtil {
     private val client = OkHttpClient()
 
-    suspend fun getLatestVersion(repoUrl: String): String {
+     fun getLatestVersion(repoUrl: String): String {
 
         val latestUrl = "$repoUrl/releases/latest"
 

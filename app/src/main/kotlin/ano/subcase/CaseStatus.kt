@@ -7,4 +7,6 @@ object CaseStatus {
     var lanIP = mutableStateOf("")
 
     var isServiceRunning = mutableStateOf(false)
+
+    var showUpdateDialog = mutableStateOf(false)
 }

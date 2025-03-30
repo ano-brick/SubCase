@@ -1,9 +1,9 @@
 package ano.subcase
 
 import android.app.Application
-import ano.subcase.server.FrontendServer
 import ano.subcase.util.AppUtil
 import ano.subcase.util.ConfigStore
+import ano.subcase.util.SubStore
 import timber.log.Timber
 
 lateinit var caseApp: CaseApplication
@@ -17,10 +17,11 @@ class CaseApplication : Application() {
         Timber.d("TimberInitializer is initialized.")
         caseApp = this
 
-
         if (ConfigStore.isFirstOpen) {
             AppUtil.initFirstOpen()
             ConfigStore.isFirstOpen = false
         }
+        
+        SubStore.checkLatestVersion()
     }
 }

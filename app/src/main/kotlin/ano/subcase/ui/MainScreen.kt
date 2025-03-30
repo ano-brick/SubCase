@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,18 +24,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -49,12 +49,12 @@ import androidx.navigation.NavController
 import ano.subcase.BuildConfig
 import ano.subcase.CaseStatus
 import ano.subcase.R
-import ano.subcase.server.BackendServer
-import ano.subcase.server.FrontendServer
 import ano.subcase.ui.theme.Blue
 import ano.subcase.ui.theme.switchColors
 import ano.subcase.util.ConfigStore
 import ano.subcase.util.SubStore
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -62,7 +62,7 @@ fun MainScreen(navController: NavController) {
     val mViewModel = viewModel<MainViewModel>()
 
     Scaffold(
-        topBar = { MainTopBar(navController, mViewModel) }
+        topBar = { MainTopBar(mViewModel) }
     ) {
         Column(
             modifier = Modifier
@@ -84,16 +84,100 @@ fun MainScreen(navController: NavController) {
             }
             Spacer(modifier = Modifier.padding(10.dp))
             OpenSubStore(mViewModel)
-
+            Spacer(modifier = Modifier.padding(10.dp))
             VersionSpan()
         }
+
+        if (CaseStatus.showUpdateDialog.value) {
+            UpdateDialog()
+        }
+
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UpdateDialog() {
+
+    var isUpdating = remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = {},
+        title = {
+            Text(text = "检测到 SubStore 有新版本", fontSize = 18.sp)
+        },
+        text = {
+            Column {
+                if (SubStore.remoteFrontendVersion.value != SubStore.localFrontendVersion) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 5.dp)
+                    ) {
+                        Text("前端")
+                        Text("(${SubStore.localFrontendVersion} -> ${SubStore.remoteFrontendVersion.value})")
+                    }
+                }
+
+                if (SubStore.remoteBackendVersion.value != SubStore.localBackendVersion) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp)
+                    ) {
+                        Text("后端")
+                        Text("(${SubStore.localBackendVersion} -> ${SubStore.remoteBackendVersion.value})")
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    modifier = Modifier.clickable {
+                        if (isUpdating.value) {
+                            return@clickable
+                        }
+                        CaseStatus.showUpdateDialog.value = false
+                    },
+                    color = Color.Gray,
+                    text = "取消",
+                )
+                Spacer(modifier = Modifier.padding(10.dp))
+                TextButton(
+                    onClick = {
+                        if (isUpdating.value) {
+                            return@TextButton
+                        }
+                        isUpdating.value = true
+                        GlobalScope.launch {
+                            if (SubStore.remoteFrontendVersion.value != SubStore.localFrontendVersion) {
+                                SubStore.updateFrontend()
+                            }
+                            if (SubStore.remoteBackendVersion.value != SubStore.localBackendVersion) {
+                                SubStore.updateBackend()
+                            }
+                            isUpdating.value = false
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = Color.White,
+                        containerColor = Blue
+                    )
+                ) {
+                    Text("更新")
+                }
+            }
+        },
+    )
 }
 
 @Composable
 fun ServerSwitch(mViewModel: MainViewModel) {
     val haptic = LocalHapticFeedback.current
-    val context = LocalContext.current
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -207,7 +291,7 @@ fun FrontEndCard(mViewModel: MainViewModel) {
                 )
 
                 Text(
-                    SubStore.frontendLocalVer,
+                    SubStore.localFrontendVersion,
                     modifier = Modifier.clickable {
                         urlHandler.openUri("https://github.com/sub-store-org/Sub-Store-Front-End/releases")
                     },
@@ -291,7 +375,7 @@ fun BackEndCard(mViewModel: MainViewModel) {
                 )
 
                 Text(
-                    SubStore.backendLocalVer,
+                    SubStore.localBackendVersion,
                     modifier = Modifier.clickable {
                         urlHandler.openUri("https://github.com/sub-store-org/Sub-Store/releases")
                     },
@@ -403,7 +487,7 @@ fun OpenSubStore(mViewModel: MainViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainTopBar(navController: NavController, mViewModel: MainViewModel) {
+fun MainTopBar(mViewModel: MainViewModel) {
     val hapic = LocalHapticFeedback.current
 
     CenterAlignedTopAppBar(
@@ -420,7 +504,7 @@ fun MainTopBar(navController: NavController, mViewModel: MainViewModel) {
             IconButton(
                 onClick = {
                     hapic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    mViewModel.checkAndUpdate()
+                    SubStore.checkLatestVersion()
                 },
             ) {
                 Icon(
@@ -441,7 +525,7 @@ fun VersionSpan() {
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            stringResource(id = R.string.app_name) + " " + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")",
+            BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")",
             color = Color.Gray,
             fontWeight = FontWeight.Light,
             fontSize = 14.sp,
