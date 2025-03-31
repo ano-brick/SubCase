@@ -1,7 +1,6 @@
 package ano.subcase.util
 
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import ano.subcase.CaseStatus
 import ano.subcase.caseApp
 import ano.subcase.util.AppUtil.unzip
@@ -31,17 +30,50 @@ object SubStore {
             ConfigStore.localBackendVersion = value
         }
 
-    var remoteFrontendVersion = mutableStateOf(ConfigStore.localFrontendVersion)
-    var remoteBackendVersion = mutableStateOf(ConfigStore.localBackendVersion)
+    var remoteFrontendVersion = ConfigStore.localFrontendVersion
+    var remoteBackendVersion = ConfigStore.localBackendVersion
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun checkLatestVersion() {
+    fun checkLatestVersion(showToast: Boolean = false) {
         GlobalScope.launch {
-            remoteBackendVersion.value = GithubUtil.getLatestVersion(REPO_BACKEND)
-            remoteFrontendVersion.value = GithubUtil.getLatestVersion(REPO_FRONTEND)
+            val backendResult = GithubUtil.getLatestVersion(REPO_BACKEND)
+            if (backendResult.isSuccess) {
+                remoteBackendVersion = backendResult.getOrNull()!!
+            } else {
+                Timber.e(backendResult.exceptionOrNull())
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        caseApp,
+                        "检测后端新版本失败,请检查您的网络环境",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
 
-            if (remoteFrontendVersion.value != localFrontendVersion || remoteBackendVersion.value != localBackendVersion) {
+            val frontendResult = GithubUtil.getLatestVersion(REPO_FRONTEND)
+            if (frontendResult.isSuccess) {
+                remoteFrontendVersion = frontendResult.getOrNull()!!
+            } else {
+                Timber.e(frontendResult.exceptionOrNull())
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        caseApp,
+                        "检测前端新版本失败,请检查您的网络环境",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+            if ((remoteFrontendVersion.isNotEmpty() && remoteFrontendVersion != localFrontendVersion) || (remoteBackendVersion.isNotEmpty() && remoteBackendVersion != localBackendVersion)) {
                 CaseStatus.showUpdateDialog.value = true
+            } else if (frontendResult.isSuccess && backendResult.isSuccess && showToast) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        caseApp,
+                        "当前已是最新版本",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -49,10 +81,10 @@ object SubStore {
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun updateFrontend(): Result<Unit> {
         withContext(Dispatchers.Main) {
-            Timber.d("Updating frontend to ${remoteFrontendVersion.value}")
+            Timber.d("Updating frontend to ${remoteFrontendVersion}")
             Toast.makeText(
                 caseApp,
-                "正在将前端更新到 v${remoteFrontendVersion.value}",
+                "正在将前端更新到 v${remoteFrontendVersion}",
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -60,7 +92,7 @@ object SubStore {
         // Start download frontend
         val result = GithubUtil.downloadFile(
             REPO_FRONTEND,
-            remoteFrontendVersion.value,
+            remoteFrontendVersion,
             "dist.zip",
             caseApp.filesDir.absolutePath
         )
@@ -77,14 +109,14 @@ object SubStore {
                     Paths.get(caseApp.filesDir.path + "/frontend")
                 )
 
-                ConfigStore.localFrontendVersion = remoteFrontendVersion.value
+                ConfigStore.localFrontendVersion = remoteFrontendVersion
 
-                val msg = "Frontend updated to ${remoteFrontendVersion.value}"
+                val msg = "Frontend updated to $remoteFrontendVersion"
                 Timber.d(msg)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         caseApp,
-                        "前端已更新到 v${remoteFrontendVersion.value}",
+                        "前端已更新到 v${remoteFrontendVersion}",
                         Toast.LENGTH_SHORT
                     )
                         .show()
@@ -104,46 +136,33 @@ object SubStore {
     @OptIn(DelicateCoroutinesApi::class)
     suspend fun updateBackend(): Result<Unit> {
         withContext(Dispatchers.Main) {
-            Timber.d("Updating backend to ${remoteBackendVersion.value}")
+            Timber.d("Updating backend to ${remoteBackendVersion}")
             Toast.makeText(
                 caseApp,
-                "正在将后端更新到 v${remoteBackendVersion.value}",
+                "正在将后端更新到 v${remoteBackendVersion}",
                 Toast.LENGTH_SHORT
             ).show()
         }
 
         // Start download backend
-        val script0Result = GithubUtil.downloadFile(
+        val backendScript = GithubUtil.downloadFile(
             REPO_BACKEND,
-            remoteBackendVersion.value,
-            "sub-store-0.min.js",
+            remoteBackendVersion,
+            "sub-store.bundle.js",
             caseApp.filesDir.absolutePath
         )
 
-        val script1Result = GithubUtil.downloadFile(
-            REPO_BACKEND,
-            remoteBackendVersion.value,
-            "sub-store-1.min.js",
-            caseApp.filesDir.absolutePath
-        )
-
-        if (script0Result.isSuccess && script1Result.isSuccess) {
-            Files.deleteIfExists(Paths.get(caseApp.filesDir.path + "/backend/sub-store-0.min.js"))
-            Files.deleteIfExists(Paths.get(caseApp.filesDir.path + "/backend/sub-store-1.min.js"))
+        if (backendScript.isSuccess) {
+            Files.deleteIfExists(Paths.get(caseApp.filesDir.path + "/backend/sub-store.bundle.js"))
 
             Files.move(
-                Paths.get(caseApp.filesDir.path + "/sub-store-0.min.js"),
-                Paths.get(caseApp.filesDir.path + "/backend/sub-store-0.min.js")
+                Paths.get(caseApp.filesDir.path + "/sub-store.bundle.js"),
+                Paths.get(caseApp.filesDir.path + "/backend/sub-store.bundle.js")
             )
 
-            Files.move(
-                Paths.get(caseApp.filesDir.path + "/sub-store-1.min.js"),
-                Paths.get(caseApp.filesDir.path + "/backend/sub-store-1.min.js")
-            )
+            ConfigStore.localBackendVersion = remoteBackendVersion
 
-            ConfigStore.localBackendVersion = remoteBackendVersion.value
-
-            val msg = "Backend updated to ${remoteBackendVersion.value}"
+            val msg = "Backend updated to ${remoteBackendVersion}"
             Timber.d(msg)
             withContext(Dispatchers.Main) {
                 Toast.makeText(caseApp, msg, Toast.LENGTH_SHORT).show()

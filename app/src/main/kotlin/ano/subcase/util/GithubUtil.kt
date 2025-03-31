@@ -13,22 +13,36 @@ const val REPO_FRONTEND = "https://github.com/sub-store-org/Sub-Store-Front-End"
 object GithubUtil {
     private val client = OkHttpClient()
 
-     fun getLatestVersion(repoUrl: String): String {
+    fun getLatestVersion(repoUrl: String): Result<String> {
 
         val latestUrl = "$repoUrl/releases/latest"
 
         val request = Request.Builder().url(latestUrl).build()
-        val response = client.newCall(request).execute()
 
-        val latestReleaseUrl = response.networkResponse?.request?.url.toString()
-        Timber.d("latest release url: $latestReleaseUrl")
+        try {
+            val response = client.newCall(request).execute()
 
-        val latestVersion = latestReleaseUrl.substringAfterLast("/")
-        println("LatestVersion: $latestVersion , RepoUrl: $repoUrl")
-        return latestVersion
+            val latestReleaseUrl = response.networkResponse?.request?.url.toString()
+            Timber.d("latest release url: $latestReleaseUrl")
+
+            response.close()
+
+            val latestVersion = latestReleaseUrl.substringAfterLast("/")
+            println("LatestVersion: $latestVersion , RepoUrl: $repoUrl")
+
+            return Result.success(latestVersion)
+        } catch (e: Exception) {
+            Timber.e(e)
+            return Result.failure(e)
+        }
     }
 
-    suspend fun downloadFile(projectUrl: String, version: String, fileName: String, destPath: String): Result<String> {
+    suspend fun downloadFile(
+        projectUrl: String,
+        version: String,
+        fileName: String,
+        destPath: String
+    ): Result<String> {
         try {
             // get download url
             val fileRequest =

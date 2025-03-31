@@ -53,6 +53,7 @@ import ano.subcase.ui.theme.Blue
 import ano.subcase.ui.theme.switchColors
 import ano.subcase.util.ConfigStore
 import ano.subcase.util.SubStore
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -95,7 +96,7 @@ fun MainScreen(navController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun UpdateDialog() {
 
@@ -108,7 +109,7 @@ fun UpdateDialog() {
         },
         text = {
             Column {
-                if (SubStore.remoteFrontendVersion.value != SubStore.localFrontendVersion) {
+                if (SubStore.remoteFrontendVersion != SubStore.localFrontendVersion) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
@@ -116,11 +117,11 @@ fun UpdateDialog() {
                             .padding(bottom = 5.dp)
                     ) {
                         Text("前端")
-                        Text("(${SubStore.localFrontendVersion} -> ${SubStore.remoteFrontendVersion.value})")
+                        Text("(${SubStore.localFrontendVersion} -> ${SubStore.remoteFrontendVersion})")
                     }
                 }
 
-                if (SubStore.remoteBackendVersion.value != SubStore.localBackendVersion) {
+                if (SubStore.remoteBackendVersion != SubStore.localBackendVersion) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
@@ -128,7 +129,7 @@ fun UpdateDialog() {
                             .padding(bottom = 10.dp)
                     ) {
                         Text("后端")
-                        Text("(${SubStore.localBackendVersion} -> ${SubStore.remoteBackendVersion.value})")
+                        Text("(${SubStore.localBackendVersion} -> ${SubStore.remoteBackendVersion})")
                     }
                 }
             }
@@ -153,10 +154,10 @@ fun UpdateDialog() {
                         }
                         isUpdating.value = true
                         GlobalScope.launch {
-                            if (SubStore.remoteFrontendVersion.value != SubStore.localFrontendVersion) {
+                            if (SubStore.remoteFrontendVersion != SubStore.localFrontendVersion) {
                                 SubStore.updateFrontend()
                             }
-                            if (SubStore.remoteBackendVersion.value != SubStore.localBackendVersion) {
+                            if (SubStore.remoteBackendVersion != SubStore.localBackendVersion) {
                                 SubStore.updateBackend()
                             }
                             isUpdating.value = false
@@ -265,9 +266,9 @@ fun FrontEndCard(mViewModel: MainViewModel) {
                 }
 
                 Text(
-                    "http://${host}:8081",
+                    "http://${host}:8080",
                     modifier = Modifier.clickable {
-                        clipboardManager.setText(AnnotatedString("http://${host}:8081"))
+                        clipboardManager.setText(AnnotatedString("http://${host}:8080"))
                     },
                 )
             }
@@ -349,9 +350,9 @@ fun BackEndCard(mViewModel: MainViewModel) {
                 }
 
                 Text(
-                    "http://${host}:8080",
+                    "http://${host}:8081",
                     modifier = Modifier.clickable {
-                        clipboardManager.setText(AnnotatedString("http://${host}:8080"))
+                        clipboardManager.setText(AnnotatedString("http://${host}:8081"))
                     },
                 )
             }
@@ -476,7 +477,7 @@ fun OpenSubStore(mViewModel: MainViewModel) {
             Text("打开SubStore")
         },
         onClick = {
-            urlHandler.openUri("http://${host}:8081/subs?api=http://${host}:8080")
+            urlHandler.openUri("http://${host}:8080/subs?api=http://${host}:8081")
         },
         colors = ButtonDefaults.textButtonColors(
             contentColor = Color.White,
@@ -504,7 +505,7 @@ fun MainTopBar(mViewModel: MainViewModel) {
             IconButton(
                 onClick = {
                     hapic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    SubStore.checkLatestVersion()
+                    SubStore.checkLatestVersion(showToast = true)
                 },
             ) {
                 Icon(

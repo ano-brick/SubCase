@@ -104,16 +104,7 @@ dependencies {
     //com.google.accompanist:accompanist-systemuicontroller
     implementation(libs.accompanist.systemuicontroller)
 
-    val ktor_version = "3.0.0"
-    implementation("io.ktor:ktor-server-netty:$ktor_version")
-    implementation("io.ktor:ktor-server-core:$ktor_version")
-    implementation("io.ktor:ktor-server-call-logging:$ktor_version")
-    implementation("io.ktor:ktor-server-cors:$ktor_version")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
-
-    implementation("org.slf4j:slf4j-android:1.7.36")
-
-    implementation("com.eclipsesource.j2v8:j2v8:6.2.1@aar")
+    implementation("com.caoccao.javet:javet-node-android:4.1.1")
 }

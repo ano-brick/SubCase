@@ -4,15 +4,13 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import ano.subcase.CaseStatus
-import ano.subcase.server.BackendServer
-import ano.subcase.server.FrontendServer
+import ano.subcase.engine.CaseEngine
 import ano.subcase.util.NotificationUtil
 
 class SubStoreService : Service() {
 
     companion object {
-        var backendServer: BackendServer? = null
-        var frontendServer: FrontendServer? = null
+        var caseEngine: CaseEngine? = null
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -21,22 +19,14 @@ class SubStoreService : Service() {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
 
-        val frontendPort = intent.getIntExtra("frontendPort", 8081)
-        val backendPort = intent.getIntExtra("backendPort", 8080)
+        val frontendPort = intent.getIntExtra("frontendPort", 8080)
+        val backendPort = intent.getIntExtra("backendPort", 8081)
 
         val allowLan = intent.getBooleanExtra("allowLan", false)
 
-        backendServer = BackendServer(
-            port = backendPort,
-            allowLan = allowLan
-        )
-        backendServer!!.start()
+        caseEngine = CaseEngine(backendPort = backendPort, frontendPort = frontendPort, allowLan = allowLan)
 
-        frontendServer = FrontendServer(
-            port = frontendPort,
-            allowLan = allowLan
-        )
-        frontendServer!!.start()
+        caseEngine!!.startServer()
 
         NotificationUtil.startNotification(this)
 
@@ -47,12 +37,8 @@ class SubStoreService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-
+        caseEngine!!.stopServer()
         CaseStatus.isServiceRunning.value = false
-
-        backendServer!!.stop()
-        frontendServer!!.stop()
-
         NotificationUtil.stopNotification()
     }
 }

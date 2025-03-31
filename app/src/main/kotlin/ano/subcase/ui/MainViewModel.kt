@@ -36,8 +36,8 @@ class MainViewModel : ViewModel() {
 
     fun startService() {
         val intent = Intent(caseApp, SubStoreService::class.java)
-        intent.putExtra("backendPort", 8080)
-        intent.putExtra("frontendPort", 8081)
+        intent.putExtra("backendPort", 8081)
+        intent.putExtra("frontendPort", 8080)
         intent.putExtra("allowLan", allowLan)
         viewModelScope.launch {
             caseApp.startService(intent)
