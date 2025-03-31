@@ -38,6 +38,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -86,7 +87,7 @@ fun MainScreen(navController: NavController) {
             Spacer(modifier = Modifier.padding(10.dp))
             OpenSubStore(mViewModel)
             Spacer(modifier = Modifier.padding(10.dp))
-            VersionSpan()
+            FooterSpan()
         }
 
         if (CaseStatus.showUpdateDialog.value) {
@@ -520,16 +521,32 @@ fun MainTopBar(mViewModel: MainViewModel) {
 
 @Preview
 @Composable
-fun VersionSpan() {
-    Row(
+fun FooterSpan() {
+    val uriHandler = LocalUriHandler.current
+
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")",
+            "v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")",
             color = Color.Gray,
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.Medium,
             fontSize = 14.sp,
         )
+
+        IconButton(
+            onClick = {
+                uriHandler.openUri("https://github.com/angus-cx/SubCase")
+            }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.github),
+                contentDescription = "github",
+                tint = Color.Gray,
+            )
+        }
     }
 }
+
+
