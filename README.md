@@ -9,10 +9,10 @@ A Powerful Wrapper for [SubStore](https://github.com/sub-store-org/Sub-Store) on
 
 ## Features
 
-1. no need root permission, no need nodejs runtime.
+1. no need root permission.
 2. easy to use.
 
 ## Used Library
 
-1. [J2V8](https://github.com/eclipsesource/J2V8)  
-2. [Ktor](https://ktor.io/)
+1. [Javet](https://github.com/caoccao/Javet)
+2. [Okhttp](https://github.com/square/okhttp)

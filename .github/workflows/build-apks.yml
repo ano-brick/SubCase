@@ -36,42 +36,51 @@ jobs:
           fi
 
       - name: Setup JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-home-cache-cleanup: true
+          gradle-version: wrapper
 
-      - name: Build with Gradle
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup NDK
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27
+          link-to-sdk: true
+
+      - name: Build Release APK
         run: |
-          {
-            echo 'org.gradle.parallel=true'
-            echo 'org.gradle.vfs.watch=true'
-            echo 'org.gradle.jvmargs=-Xmx4g'
-            echo 'android.native.buildOutput=verbose'
-          } >> gradle.properties
-          sed -i 's/org.gradle.configuration-cache=true//g' gradle.properties
-          ./gradlew clean 
           ./gradlew assembleRelease
-          ./gradlew assembleDebug
 
-      - name: Upload build artifact
+      - name: Upload release artifact
         uses: actions/upload-artifact@v4
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         with:
-          name: subcase
-          path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/debug/*.apk
-
+          name: release
+          path: app/build/outputs/apk/release/*.apk
+            
       - name: Upload mappings
         uses: actions/upload-artifact@v4
         if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
         with:
           name: mappings
           path: app/build/outputs/mapping/release/
+
+      - name: Build Debug APK
+        run: |
+          ./gradlew assembleDebug
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ ( github.event_name != 'pull_request' && github.ref == 'refs/heads/main' ) || github.ref_type == 'tag' }}
+        with:
+          name: debug
+          path: app/build/outputs/apk/debug/*.apk
