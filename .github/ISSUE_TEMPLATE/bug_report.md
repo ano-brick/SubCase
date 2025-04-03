@@ -5,15 +5,16 @@ title: ""
 labels: ["bug"]
 ---
 
-## 预期行为 ｜ Expected Behavior
+**Hi，本项目是 [Sub-Store](https://github.com/sub-store-org/Sub-Store) 在 Android 平台上的封装，旨在方便您在 Android 设备上使用 [Sub-Store](https://github.com/sub-store-org/Sub-Store) 。请在提交 Issue 前确认问题与本项目相关；若问题属于 [Sub-Store](https://github.com/sub-store-org/Sub-Store) 本身，请至其仓库提交 Issue。**
+
+
+## 预期行为 
 <!--- 告诉我们应该发生什么 -->
-<!--- Tell us what should happen -->
 
-## 当前行为 ｜ Current Behavior
+## 当前行为
 <!--- 告诉我们当前发生了什么 -->
-<!--- Tell us what happens instead of the expected behavior -->
 
-## 复现步骤 ｜ Steps to Reproduce
+## 复现步骤
 1.
 2.
 3.
