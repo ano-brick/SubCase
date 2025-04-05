@@ -1,59 +1,58 @@
 package ano.subcase.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import ano.subcase.BuildConfig
 import ano.subcase.CaseStatus
 import ano.subcase.R
+import ano.subcase.service.ServiceManager
 import ano.subcase.ui.theme.Blue
-import ano.subcase.ui.theme.switchColors
-import ano.subcase.util.ConfigStore
 import ano.subcase.util.SubStore
+import com.google.accompanist.web.WebView
+import com.google.accompanist.web.rememberSaveableWebViewState
+import com.google.accompanist.web.rememberWebViewNavigator
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -61,39 +60,42 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(navController: NavController) {
 
-    val mViewModel = viewModel<MainViewModel>()
+    if (!CaseStatus.isServiceRunning.value) {
+        ServiceManager.startService()
+    }
 
-    Scaffold(
-        topBar = { MainTopBar(mViewModel) }
-    ) {
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(it)
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            ServerSwitch(mViewModel)
-            Spacer(modifier = Modifier.padding(10.dp))
-            FrontEndCard(mViewModel)
-            Spacer(modifier = Modifier.padding(10.dp))
-            BackEndCard(mViewModel)
-            HintSpan()
-            Spacer(modifier = Modifier.padding(10.dp))
-            AllowLanSpan(mViewModel)
-            if (mViewModel.allowLan) {
-                AllowLanHint()
+            if (CaseStatus.isServiceRunning.value) {
+                CaseWebView()
+            } else {
+                WebViewPlaceholder()
             }
-            Spacer(modifier = Modifier.padding(10.dp))
-            OpenSubStore(mViewModel)
-            Spacer(modifier = Modifier.padding(10.dp))
-            FooterSpan()
         }
+
+        SettingFloatingButton(navController)
 
         if (CaseStatus.showUpdateDialog.value) {
             UpdateDialog()
         }
+    }
+}
 
+@Composable
+fun WebViewPlaceholder() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "SubStore 正在启动...",
+            fontSize = 20.sp
+        )
     }
 }
 
@@ -176,377 +178,87 @@ fun UpdateDialog() {
     )
 }
 
-@Composable
-fun ServerSwitch(mViewModel: MainViewModel) {
-    val haptic = LocalHapticFeedback.current
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                stringResource(R.string.service_status),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Switch(
-                checked = CaseStatus.isServiceRunning.value,
-                onCheckedChange = {
-                    haptic.performHapticFeedback(
-                        HapticFeedbackType.TextHandleMove
-                    )
-
-                    ConfigStore.isServiceRunning = it
-
-
-                    if (it) {
-                        mViewModel.startService()
-                    } else {
-                        mViewModel.stopService()
-                    }
-
-                },
-                colors = switchColors(),
-                modifier = Modifier.scale(0.9f)
-            )
-        }
-    }
-}
-
-@Composable
-fun FrontEndCard(mViewModel: MainViewModel) {
-    val clipboardManager = LocalClipboardManager.current
-    val urlHandler = LocalUriHandler.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp),
-        horizontalArrangement = Arrangement.Start,
-    ) {
-        Text(
-            stringResource(R.string.frontend),
-            fontSize = 14.sp
-        )
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    stringResource(R.string.address),
-                )
-
-                val host: String
-                if (mViewModel.allowLan) {
-                    host = CaseStatus.lanIP.value
-                } else {
-                    host = "127.0.0.1"
-                }
-
-                Text(
-                    "http://${host}:8080",
-                    modifier = Modifier.clickable {
-                        clipboardManager.setText(AnnotatedString("http://${host}:8080"))
-                    },
-                )
-            }
-
-            HorizontalDivider(
-                modifier = Modifier.padding(start = 10.dp),
-                color = Color.LightGray,
-                thickness = 0.5.dp
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    stringResource(R.string.version),
-                )
-
-                Text(
-                    SubStore.localFrontendVersion,
-                    modifier = Modifier.clickable {
-                        urlHandler.openUri("https://github.com/sub-store-org/Sub-Store-Front-End/releases")
-                    },
-                    color = Blue
-                )
-            }
-
-        }
-    }
-}
-
-@Composable
-fun BackEndCard(mViewModel: MainViewModel) {
-    val haptic = LocalHapticFeedback.current
-    val urlHandler = LocalUriHandler.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp),
-        horizontalArrangement = Arrangement.Start,
-    ) {
-        Text(
-            stringResource(R.string.backend),
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 14.sp
-        )
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    stringResource(R.string.address),
-                )
-
-                val clipboardManager = LocalClipboardManager.current
-
-                val host: String = if (mViewModel.allowLan) {
-                    CaseStatus.lanIP.value
-                } else {
-                    "127.0.0.1"
-                }
-
-                Text(
-                    "http://${host}:8081",
-                    modifier = Modifier.clickable {
-                        clipboardManager.setText(AnnotatedString("http://${host}:8081"))
-                    },
-                )
-            }
-
-            HorizontalDivider(
-                modifier = Modifier.padding(start = 10.dp),
-                color = Color.LightGray,
-                thickness = 0.5.dp
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    stringResource(R.string.version),
-                )
-
-                Text(
-                    SubStore.localBackendVersion,
-                    modifier = Modifier.clickable {
-                        urlHandler.openUri("https://github.com/sub-store-org/Sub-Store/releases")
-                    },
-                    color = Blue
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun AllowLanSpan(mViewModel: MainViewModel) {
-    val haptic = LocalHapticFeedback.current
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
-                .padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                stringResource(R.string.allow_lan),
-            )
-
-            Switch(
-                checked = mViewModel.allowLan,
-                onCheckedChange = {
-                    haptic.performHapticFeedback(
-                        HapticFeedbackType.TextHandleMove
-                    )
-
-                    mViewModel.allowLan = it
-                    ConfigStore.isAllowLan = it
-                },
-                colors = switchColors(),
-                modifier = Modifier.scale(0.9f)
-            )
-        }
-    }
-}
-
-@Composable
-fun HintSpan() {
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp, top = 5.dp),
-        text = "你可以点击backend地址,来快速复制",
-        color = Color(0xFF909399),
-        fontSize = 14.sp
-    )
-}
-
-@Composable
-fun AllowLanHint() {
-
-    if (CaseStatus.isWifi.value) {
-        return
-    }
-
-    val text = "当前不是WIFI环境,无法获取准确的局域网IP!"
-
-    Text(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp, top = 5.dp),
-        text = text,
-        color = Color(0xFFfaad14),
-        fontSize = 14.sp
-    )
-}
-
-@Composable
-fun OpenSubStore(mViewModel: MainViewModel) {
-
-    val host: String
-    if (mViewModel.allowLan) {
-        host = CaseStatus.lanIP.value
-    } else {
-        host = "127.0.0.1"
-    }
-
-    val urlHandler = LocalUriHandler.current
-
-    TextButton(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp, top = 5.dp),
-        content = {
-            Text("打开SubStore")
-        },
-        onClick = {
-            urlHandler.openUri("http://${host}:8080/subs?api=http://${host}:8081")
-        },
-        colors = ButtonDefaults.textButtonColors(
-            contentColor = Color.White,
-            containerColor = Blue
-        )
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainTopBar(mViewModel: MainViewModel) {
-    val hapic = LocalHapticFeedback.current
-
-    CenterAlignedTopAppBar(
-        modifier = Modifier.systemBarsPadding(),
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent
-        ),
-        title = {
-            Text(
-                text = stringResource(id = R.string.app_name),
-            )
-        },
-        actions = {
-            IconButton(
-                onClick = {
-                    hapic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    SubStore.checkLatestVersion(showToast = true)
-                },
-            ) {
-                Icon(
-                    Icons.Outlined.Refresh,
-                    contentDescription = "检查 Sub Store 更新",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        },
-    )
-}
-
 @Preview
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun FooterSpan() {
-    val uriHandler = LocalUriHandler.current
+fun CaseWebView() {
+    val webViewState = rememberSaveableWebViewState()
+    val navigator = rememberWebViewNavigator()
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            "v" + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")",
-            color = Color.Gray,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-        )
-
-        IconButton(
-            onClick = {
-                uriHandler.openUri("https://github.com/angus-cx/SubCase")
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.github),
-                contentDescription = "github",
-                tint = Color.Gray,
-            )
+    LaunchedEffect(navigator) {
+        val bundle = webViewState.viewState
+        if (bundle == null) {
+            // This is the first time load, so load the sub store page.
+            navigator.loadUrl("http://127.0.0.1:8080/subs?api=http://127.0.0.1:8081")
         }
     }
+
+    WebView(
+        state = webViewState,
+        onCreated = {
+            it.settings.javaScriptEnabled = true
+            it.settings.domStorageEnabled = true
+        },
+        modifier = Modifier.fillMaxSize(),
+        navigator = navigator
+    )
 }
 
+@Composable
+fun SettingFloatingButton(navController: NavController) {
+    val haptic = LocalHapticFeedback.current
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+    val (screenWidth, screenHeight, fabSize) = with(density) {
+        Triple(
+            configuration.screenWidthDp.dp.toPx(),
+            configuration.screenHeightDp.dp.toPx(),
+            56.dp.toPx()
+        )
+    }
 
+    // 设置默认位置在右侧中下位置
+    var offsetX by remember { mutableFloatStateOf(screenWidth - fabSize - with(density) { 16.dp.toPx() }) } // 右侧留出16dp边距
+    var offsetY by remember { mutableFloatStateOf((screenHeight - fabSize) * 3 / 4) } // 垂直居中
+
+    // 添加边距限制，避免被系统栏遮挡
+    val statusBarHeight =
+        with(density) { WindowInsets.statusBars.getTop(this).toDp().toPx() } // 状态栏高度
+    val navBarHeight =
+        with(density) { WindowInsets.navigationBars.getTop(this).toDp().toPx() } // 导航栏高度
+    val minY = statusBarHeight
+    val maxY = screenHeight - navBarHeight - fabSize
+
+
+
+    FloatingActionButton(
+        shape = CircleShape,
+        onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            navController.navigate("setting_screen")
+        },
+        containerColor = Color.Blue,
+        contentColor = Color.White,
+        modifier = Modifier
+            .offset { IntOffset(offsetX.toInt(), offsetY.toInt()) }
+            .pointerInput(Unit) {
+                detectDragGestures { change, dragAmount ->
+                    change.consume()
+
+                    // 计算新的位置
+                    val newX = offsetX + dragAmount.x
+                    val newY = offsetY + dragAmount.y
+
+                    // 限制在屏幕范围内，并考虑系统栏
+                    offsetX = newX.coerceIn(0f, screenWidth - fabSize)
+                    offsetY = newY.coerceIn(minY, maxY)
+                }
+            }
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_settings),
+            contentDescription = "设置",
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
